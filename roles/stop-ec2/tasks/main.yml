@@ -1,0 +1,17 @@
+---
+ - name: First collect all facts of ec2 instances
+   ec2_instance_facts:
+    region: "{{ ec2_region }}"
+    filters:
+       "tag:Name": Webserver
+   register: ec2_metadata
+
+ - name: Isolate instance id from collected facts and stop instance
+   local_action:
+     module: ec2
+     region: "{{ ec2_region }}"
+     state: stopped
+     wait: True
+     assign_public_ip: yes
+     instance_ids: "{{ item['instance_id'] }}"
+   with_items: "{{ ec2_metadata.instances }}"
